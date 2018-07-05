@@ -1,4 +1,4 @@
-defmodule TdHypermedia.HypermediaControllerHelper do
+defmodule TdHypermedia.ControllerHelper do
   @moduledoc false
 
   alias Gettext.Interpolation
