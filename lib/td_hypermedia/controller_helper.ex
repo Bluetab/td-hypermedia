@@ -44,13 +44,13 @@ defmodule TdHypermedia.ControllerHelper do
   end
 
   defp hypermedia_impl(helper, conn, %{}, resource_type) do
-    current_user = conn.assigns[:current_user]
+    current_resource = conn.assigns[:current_resource]
 
     conn
     |> get_routes
     |> Enum.filter(&(!is_nil(&1.helper)))
     |> Enum.filter(&String.starts_with?(&1.helper, helper))
-    |> Enum.filter(&can?(current_user, &1.opts, resource_type))
+    |> Enum.filter(&can?(current_resource, &1.opts, resource_type))
     |> Enum.map(&interpolate(&1, %{}))
     |> Enum.filter(&(&1.path != nil))
   end
@@ -58,13 +58,13 @@ defmodule TdHypermedia.ControllerHelper do
   defp hypermedia_impl(helper, conn, resource)
 
   defp hypermedia_impl(helper, conn, resource) do
-    current_user = conn.assigns[:current_user]
+    current_resource = conn.assigns[:current_resource]
 
     conn
     |> get_routes
     |> Enum.filter(&(!is_nil(&1.helper)))
     |> Enum.filter(&String.starts_with?(&1.helper, helper))
-    |> Enum.filter(&can?(current_user, &1.opts, resource))
+    |> Enum.filter(&can?(current_resource, &1.opts, resource))
     |> Enum.map(&interpolate(&1, resource))
     |> Enum.filter(&(&1.path != nil))
     |> Enum.filter(&(resource == %{} or (&1.action != "index" and &1.action != "create")))
