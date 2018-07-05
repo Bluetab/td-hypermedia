@@ -2,13 +2,13 @@ defmodule TdHypermedia do
   @moduledoc false
   def controller do
     quote do
-      import TdBgWeb.Hypermedia.HypermediaControllerHelper
+      import TdHypermedia.ControllerHelper
     end
   end
 
   def view do
     quote do
-      import TdBgWeb.Hypermedia.HypermediaViewHelper
+      import TdHypermedia.ViewHelper
     end
   end
 
