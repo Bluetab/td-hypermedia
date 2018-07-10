@@ -12,7 +12,7 @@ defmodule TdHypermedia.ControllerHelper do
       collection_hypermedia: hypermedia(helper, conn, %{}, resource_type),
       collection:
         Enum.into(
-          Enum.map(resource, &{&1, []}),
+          Enum.map(resource, &{&1, hypermedia(helper, conn, &1, [])}),
           %{}
         )
     }

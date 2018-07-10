@@ -18,10 +18,10 @@ defmodule TdHypermedia.ViewHelper do
       %{"data" => render_one(resource, view, template, assigns)})
   end
 
-  defp render_many_hypermedia_element(resources, _collection, view, template, assigns) do
-    Enum.map(resources, fn resource ->
-      render_one(resource, view, template, assigns)
-    end)
+  defp render_many_hypermedia_element(_resources, collection, view, template, assigns) do
+    collection
+    |> Enum.map(fn {resource, actions} -> Map.merge(render_hypermedia(actions), resource) end)
+    |> Enum.map(fn resource -> render_one(resource, view, template, assigns) end)
   end
 
   defp render_hypermedia(hypermedia) do
