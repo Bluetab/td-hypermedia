@@ -45,13 +45,12 @@ defmodule TdHypermedia.ControllerHelper do
 
   defp hypermedia_impl(helper, conn, %{}, resource_type) do
     current_resource = conn.assigns[:current_resource]
-
     conn
     |> get_routes
     |> Enum.filter(&(!is_nil(&1.helper)))
     |> Enum.filter(&String.starts_with?(&1.helper, helper))
     |> Enum.filter(&can?(current_resource, &1.opts, resource_type))
-    |> Enum.map(&interpolate(&1, %{}))
+    |> Enum.map(&interpolate(&1, resource_type))
     |> Enum.filter(&(&1.path != nil))
   end
 
@@ -92,11 +91,12 @@ defmodule TdHypermedia.ControllerHelper do
   end
 
   defp interpolation(path, resource) do
-    path = Regex.replace(~r/(:\w*id)/, path, "%{id}")
-
     case path
-         |> Interpolation.to_interpolatable()
-         |> Interpolation.interpolate(resource) do
+        |> String.split("/")
+        |> Enum.map(&Regex.replace(~r/:(\w*)/, &1, "%{\\1}"))
+        |> Enum.join("/")
+        |> Interpolation.to_interpolatable()
+        |> Interpolation.interpolate(resource) do
       {:ok, route} -> route
       _ -> nil
     end
