@@ -44,12 +44,13 @@ defmodule TdHypermedia.ControllerHelper do
   end
 
   defp hypermedia_impl(helper, conn, %{}, resource_type) do
-    current_resource = conn.assigns[:current_resource]
+    current_resource = conn.assigns[:current_resource] || conn.assigns[:current_user]
+
     conn
     |> get_routes
     |> Enum.filter(&(!is_nil(&1.helper)))
     |> Enum.filter(&String.starts_with?(&1.helper, helper))
-    |> Enum.filter(&can?(current_resource, &1.opts, resource_type))
+    |> Enum.filter(&has_permission?(current_resource, &1, resource_type))
     |> Enum.map(&interpolate(&1, resource_type))
     |> Enum.filter(&(&1.path != nil))
   end
@@ -57,16 +58,24 @@ defmodule TdHypermedia.ControllerHelper do
   defp hypermedia_impl(helper, conn, resource)
 
   defp hypermedia_impl(helper, conn, resource) do
-    current_resource = conn.assigns[:current_resource]
+    current_resource = conn.assigns[:current_resource] || conn.assigns[:current_user]
 
     conn
     |> get_routes
     |> Enum.filter(&(!is_nil(&1.helper)))
     |> Enum.filter(&String.starts_with?(&1.helper, helper))
-    |> Enum.filter(&can?(current_resource, &1.opts, resource))
+    |> Enum.filter(&has_permission?(current_resource, &1, resource))
     |> Enum.map(&interpolate(&1, resource))
     |> Enum.filter(&(&1.path != nil))
     |> Enum.filter(&(resource == %{} or (&1.action != "index" and &1.action != "create")))
+  end
+
+  defp has_permission?(current_resource, %{opts: opts}, resource) do
+    can?(current_resource, opts, resource)
+  end
+
+  defp has_permission?(current_resource, %{plug_opts: opts}, resource) do
+    can?(current_resource, opts, resource)
   end
 
   defp get_routes(%{private: private} = _conn) do
@@ -81,22 +90,37 @@ defmodule TdHypermedia.ControllerHelper do
     end
   end
 
-  defp interpolate(route, resource) do
+  defp interpolate(%{plug_opts: action, path: path, verb: verb} = _route, resource) do
+    interpolate(path, action, verb, resource)
+  end
+
+  defp interpolate(%{opts: action, path: path, verb: verb} = _route, resource) do
+    interpolate(path, action, verb, resource)
+  end
+
+  defp interpolate(path, action, verb, resource) do
     %Link{
-      action: route.opts,
-      path: interpolation(route.path, resource),
-      method: route.verb,
+      action: action,
+      path: interpolation(path, resource, ~r/:(\w*id)/),
+      method: verb,
       schema: %{}
     }
   end
 
-  defp interpolation(path, resource) do
+  defp interpolation(path, resource, regex) do
+    case Regex.scan(regex, path) do
+      [] -> path
+      [_id] -> interpolation(path, resource, regex, "%{id}")
+      _ids -> interpolation(path, resource, regex, "%{\\1}")
+    end
+  end
+
+  defp interpolation(path, resource, regex, replacement) do
+    path = Regex.replace(regex, path, replacement)
+
     case path
-        |> String.split("/")
-        |> Enum.map(&Regex.replace(~r/:(\w*)/, &1, "%{\\1}"))
-        |> Enum.join("/")
-        |> Interpolation.to_interpolatable()
-        |> Interpolation.interpolate(resource) do
+         |> Interpolation.to_interpolatable()
+         |> Interpolation.interpolate(resource) do
       {:ok, route} -> route
       _ -> nil
     end
@@ -112,7 +136,7 @@ defmodule TdHypermedia.ControllerHelper do
     conn
     |> get_routes
     |> Enum.filter(&(&1.helper == helper and &1.opts == :index))
-    |> Enum.filter(&can?(current_user, &1.opts, resource))
+    |> Enum.filter(&has_permission?(current_user, &1, resource))
     |> Enum.map(&interpolate(&1, resource))
     |> Enum.filter(&(&1.path != nil))
   end
