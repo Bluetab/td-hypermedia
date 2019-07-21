@@ -24,7 +24,8 @@ defmodule TdHypermedia.MixProject do
       {:phoenix, "~> 1.3 or ~> 1.4"},
       {:poison, "~> 2.2 or ~> 3.0", optional: true},
       {:gettext, "~> 0.15"},
-      {:canada, "~> 1.0.2"}
+      {:canada, "~> 1.0.2"},
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false}
     ]
   end
 end
