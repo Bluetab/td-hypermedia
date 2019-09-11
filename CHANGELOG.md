@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.6.0]
+
+### Changed
+
+- [TD-2078] Preserve collection order in ControllerHelper.collection_hypermedia/2
+
 ## [3.2.0] 2019-07-22
 
 ### Added
