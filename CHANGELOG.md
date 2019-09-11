@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.6.1]
+
+### Changed
+
+- ViewHelper.render_many_hypermedia no longer takes a list of resources as it's first argument
+
 ## [3.6.0]
 
 ### Changed
