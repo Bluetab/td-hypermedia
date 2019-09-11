@@ -2,9 +2,9 @@
 
 ## [3.6.0]
 
-### Fixed
+### Changed
 
-- [TD-2078] keep the order of incoming resources when rendering hypermedia list
+- [TD-2078] Preserve collection order in ControllerHelper.collection_hypermedia/2
 
 ## [3.2.0] 2019-07-22
 
