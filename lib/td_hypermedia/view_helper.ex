@@ -20,22 +20,6 @@ defmodule TdHypermedia.ViewHelper do
     )
   end
 
-  def render_many_hypermedia_resources(resources, hypermedia, view, template, assigns \\ %{}) do
-    Map.merge(
-      render_hypermedia(hypermedia.collection_hypermedia),
-      %{
-        "data" =>
-          render_many_hypermedia_resource(
-            resources,
-            hypermedia.collection,
-            view,
-            template,
-            assigns
-          )
-      }
-    )
-  end
-
   def render_one_hypermedia(resource, hypermedia, view, template, assigns \\ %{}) do
     Map.merge(
       render_hypermedia(hypermedia),
@@ -43,13 +27,7 @@ defmodule TdHypermedia.ViewHelper do
     )
   end
 
-  defp render_many_hypermedia_element(_resources, collection, view, template, assigns) do
-    collection
-    |> Enum.map(fn {resource, actions} -> Map.merge(render_hypermedia(actions), resource) end)
-    |> Enum.map(fn resource -> render_one(resource, view, template, assigns) end)
-  end
-
-  defp render_many_hypermedia_resource(resources, collection, view, template, assigns) do
+  defp render_many_hypermedia_element(resources, collection, view, template, assigns) do
     resources
     |> Enum.map(&(merge_actions(&1, collection)))
     |> Enum.map(fn resource -> render_one(resource, view, template, assigns) end)
