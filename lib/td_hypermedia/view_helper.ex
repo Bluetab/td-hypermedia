@@ -2,21 +2,24 @@ defmodule TdHypermedia.ViewHelper do
   @moduledoc false
 
   import Phoenix.View
+
   alias TdHypermedia.Link
 
-  def render_many_hypermedia(resources, hypermedia, view, template, assigns \\ %{}) do
+  @doc """
+  Render a `hypermedia` collection with a given `view` and `template`
+  (see [Phoenix.View](https://hexdocs.pm/phoenix/Phoenix.View.html)).
+
+  `hypermedia` is a map containing the following keys:
+
+    * `:collection_hypermedia` - a list of actions on the collection
+    * `:collection` - a list of tuples {resource, resource_actions}
+  """
+  def render_many_hypermedia(hypermedia, view, template, assigns \\ %{}) do
+    %{collection_hypermedia: collection_hypermedia, collection: collection} = hypermedia
+
     Map.merge(
-      render_hypermedia(hypermedia.collection_hypermedia),
-      %{
-        "data" =>
-          render_many_hypermedia_element(
-            resources,
-            hypermedia.collection,
-            view,
-            template,
-            assigns
-          )
-      }
+      render_hypermedia(collection_hypermedia),
+      %{"data" => render_many_hypermedia_element(collection, view, template, assigns)}
     )
   end
 
@@ -27,7 +30,7 @@ defmodule TdHypermedia.ViewHelper do
     )
   end
 
-  defp render_many_hypermedia_element(_resources, collection, view, template, assigns) do
+  defp render_many_hypermedia_element(collection, view, template, assigns) do
     collection
     |> Enum.map(fn {resource, actions} -> Map.merge(render_hypermedia(actions), resource) end)
     |> Enum.map(fn resource -> render_one(resource, view, template, assigns) end)
