@@ -14,30 +14,28 @@ defmodule TdHypermedia.ViewHelper do
     * `:collection_hypermedia` - a list of actions on the collection
     * `:collection` - a list of tuples {resource, resource_actions}
   """
-  def render_many_hypermedia(hypermedia, view, template, assigns \\ %{}) do
-    %{collection_hypermedia: collection_hypermedia, collection: collection} = hypermedia
-
+  def render_many_hypermedia(%{actions: actions, collection: collection}, view, template, assigns \\ %{}) do
     Map.merge(
-      render_hypermedia(collection_hypermedia),
-      %{"data" => render_many_hypermedia_element(collection, view, template, assigns)}
+      render(actions),
+      %{"data" => render(collection, view, template, assigns)}
     )
   end
 
-  def render_one_hypermedia(resource, hypermedia, view, template, assigns \\ %{}) do
+  def render_one_hypermedia(resource, actions, view, template, assigns \\ %{}) do
     Map.merge(
-      render_hypermedia(hypermedia),
+      render(actions),
       %{"data" => render_one(resource, view, template, assigns)}
     )
   end
 
-  defp render_many_hypermedia_element(collection, view, template, assigns) do
-    collection
-    |> Enum.map(fn {resource, actions} -> Map.merge(render_hypermedia(actions), resource) end)
-    |> Enum.map(fn resource -> render_one(resource, view, template, assigns) end)
+  def render(actions) do
+    %{"_actions" => Enum.into(Enum.map(actions, &render_link/1), %{})}
   end
 
-  defp render_hypermedia(hypermedia) do
-    %{"_actions" => Enum.into(Enum.map(hypermedia, &render_link/1), %{})}
+  defp render(collection, view, template, assigns) when is_list(collection) do
+    collection
+    |> Enum.map(fn {resource, actions} -> Map.merge(render(actions), resource) end)
+    |> Enum.map(fn resource -> render_one(resource, view, template, assigns) end)
   end
 
   defp render_link(%Link{} = link) do
