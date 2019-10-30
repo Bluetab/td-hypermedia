@@ -1,44 +1,53 @@
-defmodule TdHypermedia.ControllerHelper do
+defmodule TdHypermedia.Hypermedia do
   @moduledoc false
 
   alias Gettext.Interpolation
-  alias TdHypermedia.Collection
-  alias TdHypermedia.Link
-
   import Canada.Can
 
-  def hypermedia(helper, conn, resource, resource_types \\ [])
+  def build(helper, conn, resource, resource_type \\ [])
 
-  def hypermedia(helper, conn, resources, resource_type) when is_list(resources) do
-    %{
-      actions: hypermedia(helper, conn, %{}, resource_type),
-      collection: Enum.map(resources, &{&1, hypermedia(helper, conn, &1)})
-    }
+  def build(helper, conn, resources, resource_type) when is_list(resources) do
+    actions = build(helper, conn, %{}, resource_type)
+    resources = Enum.map(resources, &build(helper, conn, &1))
+
+    {resources, actions}
   end
 
-  def hypermedia(helper, conn, resource, [h | t]) do
-    hypermedia(helper, conn, resource, t) ++ [%{h => hypermedia_impl(h, conn, resource)}]
+  def build(helper, conn, resource, [h | t]) do
+    build(helper, conn, resource, t) ++ [%{h => build_impl(h, conn, resource)}]
   end
 
-  def hypermedia(helper, conn, resource, []) do
-    hypermedia_impl(helper, conn, resource)
+  def build(helper, conn, resource, []) do
+    build_impl(helper, conn, resource)
   end
 
-  def hypermedia(helper, conn, resource, resource_type) do
-    hypermedia_impl(helper, conn, resource, resource_type)
+  def build(helper, conn, resource, resource_type) do
+    build_impl(helper, conn, resource, resource_type)
   end
 
-  defp hypermedia_impl(helper, conn, resource, resource_type \\ %{})
+  defp build_impl(helper, conn, resource, resource_type \\ %{})
 
-  defp hypermedia_impl(helper, conn, %{__struct__: _} = resource, resource_type) do
-    hypermedia_impl(helper, conn, struct_to_map(resource), resource_type)
+  defp build_impl(helper, conn, %{__struct__: _} = resource, resource_type) do
+    build_impl(helper, conn, struct_to_map(resource), resource_type)
   end
 
-  defp hypermedia_impl(helper, conn, resource, resource_type) do
+  defp build_impl(helper, conn, resource, resource_type) when resource == %{} do
     current_resource = conn.assigns[:current_resource] || conn.assigns[:current_user]
+    build_actions(helper, conn, resource_type, current_resource)
+  end
 
-    target = entity_with_permissions(resource, resource_type)
+  defp build_impl(helper, conn, resource, _resource_type) do
+    current_resource = conn.assigns[:current_resource] || conn.assigns[:current_user]
+    
+    actions = 
+      helper
+      |> build_actions(conn, resource, current_resource)
+      |> Enum.filter(&(&1.action != :index and &1.action != :create))
+    
+    {resource, actions}
+  end
 
+  defp build_actions(helper, conn, target, current_resource) do
     conn
     |> get_routes
     |> Enum.filter(&(!is_nil(&1.helper)))
@@ -46,17 +55,6 @@ defmodule TdHypermedia.ControllerHelper do
     |> Enum.filter(&has_permission?(current_resource, &1, target))
     |> Enum.map(&interpolate(&1, target))
     |> Enum.filter(&(&1.path != nil))
-    |> Enum.filter(&(resource == %{} or (&1.action != "index" and &1.action != "create")))
-  end
-
-  defp entity_with_permissions(resource, resource_type) do
-    case resource_type == %{} do
-      true -> 
-        resource
-      
-      false -> 
-        resource_type
-    end
   end
 
   defp has_permission?(current_resource, %{opts: opts}, resource) do
@@ -88,7 +86,7 @@ defmodule TdHypermedia.ControllerHelper do
   end
 
   defp interpolate(path, action, verb, resource) do
-    %Link{
+    %{
       action: action,
       path: interpolation(path, resource, ~r/:(\w*id)/),
       method: verb,
