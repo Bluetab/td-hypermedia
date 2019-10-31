@@ -32,30 +32,30 @@ defmodule TdHypermedia.Hypermedia do
   end
 
   defp build_impl(path, conn, resource, resource_type) when resource == %{} do
-    current_resource = conn.assigns[:current_resource] || conn.assigns[:current_user]
-    build_actions(path, conn, resource_type, current_resource)
+    user = conn.assigns[:current_resource] || conn.assigns[:current_user]
+    build_actions(path, conn, resource_type, user)
   end
 
   defp build_impl(path, conn, resource, _resource_type) do
-    current_resource = conn.assigns[:current_resource] || conn.assigns[:current_user]
+    user = conn.assigns[:current_resource] || conn.assigns[:current_user]
     
     actions = 
       path
-      |> build_actions(conn, hint(resource, path), current_resource)
+      |> build_actions(conn, hint(resource, path), user)
       |> Enum.filter(&(&1.action != :index and &1.action != :create))
     
     {resource, actions}
   end
 
-  defp build_actions(path, conn, target, current_resource) do
-    target = atomify(target)
+  defp build_actions(path, conn, resource, user) do
+    resource = atomify(resource)
 
     conn
     |> get_routes
     |> Enum.filter(&(!is_nil(&1.helper)))
     |> Enum.filter(&route_by_path(path, &1))
-    |> Enum.filter(&has_permission?(current_resource, &1, target))
-    |> Enum.map(&interpolate(&1, target))
+    |> Enum.filter(&has_permission?(user, &1, resource))
+    |> Enum.map(&interpolate(&1, resource))
     |> Enum.filter(&(&1.path != nil))
   end
 
