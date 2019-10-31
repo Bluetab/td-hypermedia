@@ -22,6 +22,16 @@ defmodule TdHypermedia.View do
     %{_actions: Enum.into(Enum.map(actions, &render_link/1), %{})}
   end
 
+  def add_embedded_resources(resource, assigns) do
+    actions = Map.take(assigns, [:_embedded])
+    Map.merge(resource, actions)
+  end
+
+  def with_actions(struct, assigns) do
+    actions = Map.take(assigns, [:_actions])
+    Map.merge(struct, actions)
+  end
+
   defp render_link(%{action: action, path: path, method: method, schema: schema}) do
     {map_action(action),
      %{
