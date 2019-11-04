@@ -4,7 +4,7 @@ defmodule TdHypermedia.Hypermedia do
   alias Gettext.Interpolation
   import Canada.Can
 
-  def build(path, conn, resource, resource_type \\ [])
+  def build(path, conn, resource, resource_type \\ %{})
 
   def build(path, conn, resources, resource_type) when is_list(resources) do
     actions = build(path, conn, %{}, resource_type)
@@ -13,11 +13,7 @@ defmodule TdHypermedia.Hypermedia do
     {resources, actions}
   end
 
-  def build(path, conn, resource, [h | t]) do
-    build(path, conn, resource, t) ++ [%{h => build_impl(h, conn, resource)}]
-  end
-
-  def build(path, conn, resource, []) do
+  def build(path, conn, resource, resource_type) when resource_type == %{} do
     build_impl(path, conn, resource)
   end
 
@@ -38,12 +34,12 @@ defmodule TdHypermedia.Hypermedia do
 
   defp build_impl(path, conn, resource, _resource_type) do
     user = conn.assigns[:current_resource] || conn.assigns[:current_user]
-    
-    actions = 
+
+    actions =
       path
       |> build_actions(conn, hint(resource, path), user)
       |> Enum.filter(&(&1.action != :index and &1.action != :create))
-    
+
     {resource, actions}
   end
 
@@ -64,9 +60,9 @@ defmodule TdHypermedia.Hypermedia do
   defp hint(resource, _path), do: resource
 
   defp route_by_path(path, %{path: route}) do
-    route 
+    route
     |> String.split("/")
-    |> Enum.any?(& &1 == path)
+    |> Enum.any?(&(&1 == path))
   end
 
   defp has_permission?(current_resource, %{opts: opts}, resource) do
@@ -116,6 +112,7 @@ defmodule TdHypermedia.Hypermedia do
 
   defp interpolation(path, resource, regex, replacement) when is_map(resource) do
     path = Regex.replace(regex, path, replacement)
+
     case path
          |> Interpolation.to_interpolatable()
          |> Interpolation.interpolate(resource) do
@@ -125,7 +122,7 @@ defmodule TdHypermedia.Hypermedia do
   end
 
   defp interpolation(_path, _resource, _regex, _replacement), do: nil
-  
+
   defp struct_to_map(%{__struct__: name} = resource) do
     key =
       name
@@ -141,9 +138,7 @@ defmodule TdHypermedia.Hypermedia do
   end
 
   defp atomify(resource) when is_map(resource) do
-    resource
-    |> Enum.map(&atomify_pairs/1)
-    |> Enum.into(%{})
+    Enum.into(resource, %{}, &atomify_pairs/1)
   end
 
   defp atomify(resource), do: resource

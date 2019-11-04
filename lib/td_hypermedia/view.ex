@@ -19,7 +19,7 @@ defmodule TdHypermedia.View do
   end
 
   def render(actions) do
-    %{_actions: Enum.into(Enum.map(actions, &render_link/1), %{})}
+    %{_actions: Enum.into(actions, %{}, &render_link/1)}
   end
 
   def add_embedded_resources(resource, assigns) do
@@ -43,7 +43,7 @@ defmodule TdHypermedia.View do
 
   defp render_link(map) do
     [{nested, hypermedia}] = Map.to_list(map)
-    {String.to_atom(nested), Enum.into(Enum.map(hypermedia, &render_link/1), %{})}
+    {String.to_atom(nested), Enum.into(hypermedia, %{}, &render_link/1)}
   end
 
   defp map_action("show"), do: "ref"

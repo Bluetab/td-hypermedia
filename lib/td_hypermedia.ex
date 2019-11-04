@@ -4,7 +4,7 @@ defmodule Plug.TdHypermedia do
   alias TdHypermedia.View
 
   def put_hypermedia(conn, path, assigns) do
-    resource_type = Keyword.get(assigns, :resource_type, [])
+    resource_type = Keyword.get(assigns, :resource_type, %{})
     {assign_key, resources} = find_resources(assigns)
 
     rendered = render_hypermedia(path, conn, resources, resource_type, assign_key)
@@ -14,11 +14,11 @@ defmodule Plug.TdHypermedia do
   end
 
   defp find_resources(assigns) do
-    assign_key = 
+    assign_key =
       assigns
       |> Keyword.keys()
       |> hd()
-    
+
     {assign_key, Keyword.get(assigns, assign_key)}
   end
 
@@ -31,11 +31,11 @@ defmodule Plug.TdHypermedia do
   defp build_hypermedia(path, conn, resources, resource_type) do
     Hypermedia.build(path, conn, resources, resource_type)
   end
-  
+
   defp update_assigns_values(assigns, rendered) do
-    assigns 
+    assigns
     |> Keyword.delete(:resource_type)
-    |> Enum.into(%{}) 
+    |> Enum.into(%{})
     |> Map.merge(rendered)
   end
 end
