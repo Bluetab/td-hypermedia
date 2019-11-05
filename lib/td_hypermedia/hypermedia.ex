@@ -55,9 +55,17 @@ defmodule TdHypermedia.Hypermedia do
     |> Enum.filter(&(&1.path != nil))
   end
 
+  defp hint(%{} = resource, [head | _]), do: Map.put(resource, :hint, String.to_atom(head))
+
   defp hint(%{} = resource, path), do: Map.put(resource, :hint, String.to_atom(path))
 
   defp hint(resource, _path), do: resource
+
+  defp route_by_path(path, %{path: route}) when is_list(path) do
+    route
+    |> String.split("/")
+    |> Enum.any?(&(&1 in path))
+  end
 
   defp route_by_path(path, %{path: route}) do
     route
