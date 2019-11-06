@@ -1,4 +1,4 @@
-defmodule Plug.TdHypermedia do
+defmodule TdHypermedia do
   @moduledoc false
   alias TdHypermedia.Hypermedia
   alias TdHypermedia.View
