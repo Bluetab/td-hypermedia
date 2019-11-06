@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-606] Input function to hypermedia and simplifying code
+
 ## [3.6.1]
 
 ### Changed
