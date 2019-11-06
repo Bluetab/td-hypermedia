@@ -29,17 +29,14 @@ defmodule TdHypermedia.Hypermedia do
 
   defp build_impl(path, conn, resource, resource_type) when resource == %{} do
     user = conn.assigns[:current_resource] || conn.assigns[:current_user]
-    build_actions(path, conn, resource_type, user)
+    path
+    |> build_actions(conn, resource_type, user)
+    |> Enum.filter(&(&1.action != :index))
   end
 
   defp build_impl(path, conn, resource, _resource_type) do
     user = conn.assigns[:current_resource] || conn.assigns[:current_user]
-
-    actions =
-      path
-      |> build_actions(conn, hint(resource, path), user)
-      |> Enum.filter(&(&1.action != :index and &1.action != :create))
-
+    actions = build_actions(path, conn, hint(resource, path), user)
     {resource, actions}
   end
 
@@ -55,9 +52,9 @@ defmodule TdHypermedia.Hypermedia do
     |> Enum.filter(&(&1.path != nil))
   end
 
-  defp hint(%{} = resource, [head | _]), do: Map.put(resource, :hint, String.to_atom(head))
+  defp hint(%{} = resource, [head | _]), do: Map.put_new(resource, :hint, String.to_atom(head))
 
-  defp hint(%{} = resource, path), do: Map.put(resource, :hint, String.to_atom(path))
+  defp hint(%{} = resource, path), do: Map.put_new(resource, :hint, String.to_atom(path))
 
   defp hint(resource, _path), do: resource
 
