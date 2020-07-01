@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.0.0] 2020-07-01
+
+### Added
+
+- Support Phoenix 1.5, Canada 2.0
+
+### Removed
+
+- Removed support for Phoenix 1.3, Canada 1.0
+
 ## [3.6.1]
 
 ### Changed
