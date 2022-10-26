@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.54.0] 2022-10-26
+
+### Added
+
+- [TD-5284] Support Phoenix 1.6
+
+### Removed
+
+- Removed support for Phoenix <= 1.5
+
 ## [4.0.0] 2020-07-01
 
 ### Added

@@ -1,7 +1,7 @@
 defmodule TdHypermedia.ControllerHelper do
   @moduledoc false
 
-  alias Gettext.Interpolation
+  alias Gettext.Interpolation.Default
   alias TdHypermedia.Collection
   alias TdHypermedia.Link
 
@@ -43,10 +43,12 @@ defmodule TdHypermedia.ControllerHelper do
     current_resource = conn.assigns[:current_resource] || conn.assigns[:current_user]
 
     conn
-    |> get_routes
-    |> Enum.filter(&(!is_nil(&1.helper)))
-    |> Enum.filter(&String.starts_with?(&1.helper, helper))
-    |> Enum.filter(&has_permission?(current_resource, &1, resource_type))
+    |> get_routes()
+    |> Enum.reject(&is_nil(&1.helper))
+    |> Enum.filter(
+      &(String.starts_with?(&1.helper, helper) and
+          has_permission?(current_resource, &1, resource_type))
+    )
     |> Enum.map(&interpolate(&1, resource_type))
     |> Enum.filter(&(&1.path != nil))
   end
@@ -58,11 +60,12 @@ defmodule TdHypermedia.ControllerHelper do
 
     conn
     |> get_routes
-    |> Enum.filter(&(!is_nil(&1.helper)))
-    |> Enum.filter(&String.starts_with?(&1.helper, helper))
-    |> Enum.filter(&has_permission?(current_resource, &1, resource))
+    |> Enum.reject(&is_nil(&1.helper))
+    |> Enum.filter(
+      &(String.starts_with?(&1.helper, helper) and has_permission?(current_resource, &1, resource))
+    )
     |> Enum.map(&interpolate(&1, resource))
-    |> Enum.filter(&(&1.path != nil))
+    |> Enum.reject(&is_nil(&1.path))
     |> Enum.filter(&(resource == %{} or (&1.action != "index" and &1.action != "create")))
   end
 
@@ -114,9 +117,7 @@ defmodule TdHypermedia.ControllerHelper do
   defp interpolation(path, resource, regex, replacement) do
     path = Regex.replace(regex, path, replacement)
 
-    case path
-         |> Interpolation.to_interpolatable()
-         |> Interpolation.interpolate(resource) do
+    case Default.runtime_interpolate(path, resource) do
       {:ok, route} -> route
       _ -> nil
     end
@@ -131,8 +132,9 @@ defmodule TdHypermedia.ControllerHelper do
 
     conn
     |> get_routes
-    |> Enum.filter(&(&1.helper == helper and &1.opts == :index))
-    |> Enum.filter(&has_permission?(current_user, &1, resource))
+    |> Enum.filter(
+      &(&1.helper == helper and &1.opts == :index and has_permission?(current_user, &1, resource))
+    )
     |> Enum.map(&interpolate(&1, resource))
     |> Enum.filter(&(&1.path != nil))
   end
