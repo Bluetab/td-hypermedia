@@ -85,7 +85,7 @@ defmodule TdHypermedia.ControllerHelper do
 
     case router do
       nil -> []
-      r -> r.__routes__
+      r -> r.__routes__()
     end
   end
 
