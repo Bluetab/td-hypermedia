@@ -1,5 +1,11 @@
 # Changelog
 
+## [7.0.0] 2025-01-07
+
+### Changed
+
+- [TD-6911] Bump to Elixir 1.18 and updated dependencies
+
 ## [4.54.0] 2022-10-26
 
 ### Added
