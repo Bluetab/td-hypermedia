@@ -4,7 +4,7 @@
 
 ### Changed
 
-- [TD-6911] Bump to Elixir 1.17 and updated dependencies
+- [TD-6911] Bump to Elixir 1.18 and updated dependencies
 
 ## [4.54.0] 2022-10-26
 

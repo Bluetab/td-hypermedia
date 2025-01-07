@@ -5,7 +5,7 @@ defmodule TdHypermedia.MixProject do
     [
       app: :td_hypermedia,
       version: "4.54.0",
-      elixir: "~> 1.17",
+      elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -25,7 +25,7 @@ defmodule TdHypermedia.MixProject do
       {:phoenix_view, "~> 2.0"},
       {:gettext, "~> 0.26.2"},
       {:canada, "~> 2.0.0"},
-      {:credo, "~> 1.7.10", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7.11", only: [:dev, :test], runtime: false}
     ]
   end
 end
