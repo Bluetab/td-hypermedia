@@ -1,5 +1,10 @@
 # Changelog
 
+## [8.6.0] 2026-05-12
+
+### Fixed
+
+- [TD-8162] Vulnertabilities
 
 ## [7.4.0] 2025-04-09
 
