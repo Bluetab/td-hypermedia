@@ -4,7 +4,7 @@ defmodule TdHypermedia.MixProject do
   def project do
     [
       app: :td_hypermedia,
-      version: "8.6.0",
+      version: "8.6.1",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps()
@@ -21,6 +21,7 @@ defmodule TdHypermedia.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:plug, "~> 1.19.2"},
       {:phoenix, "~> 1.7.18"},
       {:phoenix_view, "~> 2.0"},
       {:gettext, "~> 0.26.2"},
