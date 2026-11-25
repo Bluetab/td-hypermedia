@@ -21,9 +21,9 @@ defmodule TdHypermedia.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:phoenix, "~> 1.7.24"},
+      {:phoenix, "~> 1.8.0"},
       {:phoenix_view, "~> 2.0"},
-      {:gettext, "~> 0.26.2"},
+      {:gettext, "~> 1.0.0"},
       {:canada, "~> 2.0.0"},
       {:credo, "~> 1.7.11", only: [:dev, :test], runtime: false}
     ]
