@@ -1,5 +1,11 @@
 # Changelog
 
+## [8.15.1] 2026-11-25
+
+### Changed
+
+- [TD-8673] Update `phoenix` to `~> 1.8.0` and `gettext` to `~> 1.0.0`. Services that depend on this library must use Phoenix 1.8 and Gettext 1.0
+
 ## [8.15.0] 2026-11-25
 
 ### Changed
